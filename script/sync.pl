@@ -7,7 +7,7 @@ use JSON qw( decode_json );
 use Try::Tiny;
 
 
-print 'Host IP (example: 10.142.66.115): ';
+print 'Host IP of your mancenter (example: 10.142.66.115): ';
 my $host = <>;
 chomp $host;
 
@@ -19,10 +19,14 @@ print 'Map Name (example: AFS_VSI_Authenticate_v1): ';
 my $map = <>;
 chomp $map;
 
-#TODO : cluster var to setup
+print 'Cluster Name (example: PPRD): ';
+my $clusterName = <>;
+chomp $clusterName;
+
+my $url = "http://$host:$port/mancenter-3.1.5/main.do?cluster=$clusterName&operation=memberlist_instancelist_alertPopup_versionMismatch_charts_dataTablesMap&type=map&instance=$map&chart1type=i_Map_OwnedEntryCount&chart2type=o_Map_total&throughputInterval=60000&curtime=0";
 
 try{
-	my $contents = get("http://$host:$port/mancenter-3.1.5/main.do?cluster=PPRD&operation=memberlist_instancelist_alertPopup_versionMismatch_charts_dataTablesMap&type=map&instance=$map&chart1type=i_Map_OwnedEntryCount&chart2type=o_Map_total&throughputInterval=60000&curtime=0");
+	my $contents = get($url);
 	my $decodedJson = decode_json($contents);
 	my $noeud1IP = $decodedJson->{'fillMapMemoryTable'}['0']['1'];
 	my $noeud2IP = $decodedJson->{'fillMapMemoryTable'}['1']['1'];
@@ -37,7 +41,7 @@ try{
 	my $sleepSec = 2;
 	my $waitingTime = 0;
 	while ($loopContinue) {
-		my $contents = get("http://$host:$port/mancenter-3.1.5/main.do?cluster=PPRD&operation=memberlist_instancelist_alertPopup_versionMismatch_charts_dataTablesMap&type=map&instance=$map&chart1type=i_Map_OwnedEntryCount&chart2type=o_Map_total&throughputInterval=60000&curtime=0");	
+		my $contents = get($url);	
 		my $decodedJson = decode_json($contents);
 		my $noeud1Entries = $decodedJson->{'fillMapMemoryTable'}['0']['2'];
 		my $noeud2Entries = $decodedJson->{'fillMapMemoryTable'}['1']['2'];
@@ -55,7 +59,7 @@ try{
 
 		$waitingTime += $sleepSec;
 		if($waitingTime % 10 == 0)  {
-			print 'Do you want to continue ? (y/n) ';
+			print "\nDo you want to continue ? (y/n) \n";
 			my $choice = <>;
 			chomp $choice;
 			if (lc($choice) eq 'n') {
