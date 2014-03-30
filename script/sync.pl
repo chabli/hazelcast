@@ -89,7 +89,6 @@ sub checkSync {
             if($waitingTime % 10 == 0)  {
                 print "\nDo you want to continue ? (y/n) \n";
                 my $choice = getInput();
-                chomp $choice;
                 if (lc($choice) eq 'n') {
                     last;
                 }
